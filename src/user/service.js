@@ -54,7 +54,7 @@ function updateUser(id, userData) {
 }
 
 // what about such case ?)
-(() => updateUser(1, {}))();
+// (() => updateUser(1, {}))();
 
 /**
  * Delete user by ID
