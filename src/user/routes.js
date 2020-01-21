@@ -12,7 +12,9 @@ const userValidation = require('./validation');
 router.get('/:id', validator.params(userValidation.userIdValidationSchema), (req, res) => {
     const userId = req.params.id;
 
-    return res.json(
+    // it is not necessary to return something from the controller =)
+    // return res.json(
+    res.json(
         userService.findUser(userId)
     );
 });
