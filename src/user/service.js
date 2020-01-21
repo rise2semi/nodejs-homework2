@@ -89,7 +89,7 @@ function autoSuggestUsers(loginSubstring, limit) {
             result.push(login);
 
             return result;
-        })
+        }, [])
         .sort()
         .splice(0, limit);
 
