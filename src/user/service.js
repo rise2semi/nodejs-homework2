@@ -43,12 +43,18 @@ function createUser(userData) {
  * @return {User}
  */
 function updateUser(id, userData) {
+    /**
+     * Funny of course but slightly error proned =)
+     */
     const user = this.findUser(id);
     const updatedUser = { ...user, ...userData };
     users.set(updatedUser.id, updatedUser);
 
     return updatedUser;
 }
+
+// what about such case ?)
+// (() => updateUser(1, {}))();
 
 /**
  * Delete user by ID
@@ -68,12 +74,31 @@ function deleteUser(id) {
  * @param {Number} limit
  */
 function autoSuggestUsers(loginSubstring, limit) {
-    return [...users.values()]
-        .filter(user => user.login.toLowerCase().includes(loginSubstring)) // check loginSubstring matches
-        .filter(user => !user.isDeleted)                                   // exclude delete users
-        .map(user => user.login)                                           // return just login property
-        .sort()                                                            // sort results
-        .splice(0, limit);                                                 // cut an array to a specified limit
+    /**
+     * For sure you could substitute three loops here by only one
+     */
+    return Array.from(users.values())
+        .reduce((result, { login, isDeleted }) => {
+            const normalisedLogin = login.toLowerCase();
+            const normalisedSearch = loginSubstring.toLowerCase();
+
+            if (normalisedLogin.includes(normalisedSearch) && !isDeleted) {
+                result.push(login);
+            }
+
+            result.push(login);
+
+            return result;
+        }, [])
+        .sort()
+        .splice(0, limit);
+
+    // return [...users.values()]
+    //     .filter(user => user.login.toLowerCase().includes(loginSubstring)) // check loginSubstring matches
+    //     .filter(user => !user.isDeleted)                                   // exclude delete users
+    //     .map(user => user.login)                                           // return just login property
+    //     .sort()                                                            // sort results
+    //     .splice(0, limit);                                                 // cut an array to a specified limit
 }
 
 module.exports = {

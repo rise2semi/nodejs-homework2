@@ -5,10 +5,16 @@ const validator = require('express-joi-validation').createValidator({});
 const userService = require('./service');
 const userValidation = require('./validation');
 
-router.get('/:id', validator.params(userValidation.userIdValidationSchema), (request, response) => {
-    const userId = request.params.id;
+/**
+ * Just a small styling tip =)
+ * It is common to see contractions of express' main objects
+ */
+router.get('/:id', validator.params(userValidation.userIdValidationSchema), (req, res) => {
+    const userId = req.params.id;
 
-    return response.json(
+    // it is not necessary to return something from the controller =)
+    // return res.json(
+    res.json(
         userService.findUser(userId)
     );
 });
@@ -33,6 +39,14 @@ router.delete('/:id', validator.params(userValidation.userIdValidationSchema), (
     return response.status('200').send();
 });
 
+/**
+ * I think that limit it is not a resource identifier thus will be good to pass it as query parameters
+ * Something like: /resource?limit=<number>
+ * The same could be applied for [loginSubStripe] because this parameter could change over time and event more such parameters could be several
+ *
+ * Resource naming might be slightly more readable
+ * I could recommend to look to resources like that one - https://restfulapi.net/resource-naming/
+ */
 router.get('/getAutoSuggestUsers/:loginSubstring/:limit', (request, response) => {
     const loginSubstring = request.params.loginSubstring;
     const limit = request.params.limit;
