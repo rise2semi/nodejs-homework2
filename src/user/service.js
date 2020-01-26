@@ -18,10 +18,14 @@ class User {
 /**
  * Find user by ID
  * @param {UUID} id
- * @return {(User|null)}
+ * @param {Function} callback
  */
-function findUser(id) {
-    return users.has(id) ? users.get(id) : null;
+function findUser(id, callback) {
+    if (!users.has(id)) {
+        return callback({ status: 404, message: 'Cannot find a user' });
+    }
+
+    callback(null, users.get(id));
 }
 
 /**
@@ -40,26 +44,37 @@ function createUser(userData) {
  * Update user by ID
  * @param {String} id
  * @param {{ login: String, password: String, age: Number }} userData
- * @return {User}
+ * @param {Function} callback
  */
-function updateUser(id, userData) {
-    const user = this.findUser(id);
-    const updatedUser = { ...user, ...userData };
-    users.set(updatedUser.id, updatedUser);
+function updateUser(id, userData, callback) {
+    findUser(id, (err, user) => {
+        if (err) {
+            return callback(err);
+        }
 
-    return updatedUser;
+        const updatedUser = { ...user, ...userData };
+        users.set(updatedUser.id, updatedUser);
+
+        callback(null, updatedUser);
+    });
 }
 
 /**
  * Delete user by ID
  * @param {String} id
+ * @param {Function} callback
  */
-function deleteUser(id) {
-    const user = this.findUser(id);
-    user.isDeleted = true;
-    users.set(user.id, user);
+function deleteUser(id, callback) {
+    findUser(id, (err, user) => {
+        if (err) {
+            return callback(err);
+        }
 
-    return user;
+        user.isDeleted = true;
+        users.set(user.id, user);
+
+        callback();
+    });
 }
 
 /**
@@ -69,9 +84,16 @@ function deleteUser(id) {
  */
 function autoSuggestUsers(loginSubstring, limit) {
     return [...users.values()]
-        .filter(user => user.login.toLowerCase().includes(loginSubstring)) // check loginSubstring matches
-        .filter(user => !user.isDeleted)                                   // exclude delete users
-        .map(user => user.login)                                           // return just login property
+        .reduce((result, { login, isDeleted }) => {
+            const normalisedLogin = login.toLowerCase();
+            const normalisedSearch = loginSubstring.toLowerCase();
+
+            if (normalisedLogin.includes(normalisedSearch) && !isDeleted) {
+                result.push(login);
+            }
+
+            return result;
+        }, [])
         .sort()                                                            // sort results
         .splice(0, limit);                                                 // cut an array to a specified limit
 }

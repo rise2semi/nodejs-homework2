@@ -10,7 +10,13 @@ const userDataValidationSchema = Joi.object({
     age: Joi.number().integer().min(4).max(130).required()
 });
 
+const userAutoSuggestValidationSchema = Joi.object({
+    loginSubstring: Joi.string(),
+    limit: Joi.number().integer()
+});
+
 module.exports = {
     userIdValidationSchema,
-    userDataValidationSchema
+    userDataValidationSchema,
+    userAutoSuggestValidationSchema
 };
