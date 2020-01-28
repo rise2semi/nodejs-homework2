@@ -9,9 +9,13 @@ router.get('/suggest', validator.query(userValidation.userAutoSuggestValidationS
     const loginSubstring = req.query.loginSubstring;
     const limit = req.query.limit;
 
-    res.json(
-        userService.autoSuggestUsers(loginSubstring, limit)
-    );
+    userService.autoSuggestUsers(loginSubstring, limit, (err, users) => {
+        if (err) {
+            return res.json([]);
+        }
+
+        res.json(users);
+    });
 });
 
 router.get('/:id', validator.params(userValidation.userIdValidationSchema), (req, res) => {
@@ -27,13 +31,13 @@ router.get('/:id', validator.params(userValidation.userIdValidationSchema), (req
 });
 
 router.post('/', validator.body(userValidation.userDataValidationSchema), (req, res) => {
-    const user = userService.createUser(req.body);
+    userService.createUser(req.body, (err, user) => {
+        if (err) {
+            return res.status(err.status).send(err.message);
+        }
 
-    if (user) {
         res.status('201').json(user);
-    } else {
-        res.status(500).send('User cannot be created');
-    }
+    });
 });
 
 router.put('/:id', validator.params(userValidation.userIdValidationSchema), validator.body(userValidation.userDataValidationSchema), (req, res) => {

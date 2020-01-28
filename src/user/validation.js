@@ -1,7 +1,7 @@
 const Joi = require('@hapi/joi');
 
 const userIdValidationSchema = Joi.object({
-    id: Joi.string().guid({ version: ['uuidv1'] }).required()
+    id: Joi.number().integer().required()
 });
 
 const userDataValidationSchema = Joi.object({
