@@ -1,18 +1,4 @@
-const { Sequelize, Model } = require('sequelize');
-const sequelize = new Sequelize('postgres://guipsbgn:x9f57WEcEXsWQtpkrsHoy3S2ozG5_2nB@rajje.db.elephantsql.com:5432/guipsbgn');
-
-class User extends Model {}
-User.init({
-    login: { type: Sequelize.STRING, allowNull: false },
-    password: { type: Sequelize.STRING, allowNull: false },
-    age: { type: Sequelize.INTEGER, allowNull: false },
-    isdeleted: { type: Sequelize.BOOLEAN }
-}, {
-    sequelize,
-    timestamps: false,
-    modelName: 'user',
-    tableName: 'users'
-});
+const User = require('../models/user');
 
 /**
  * Find user by ID
@@ -110,8 +96,8 @@ function autoSuggestUsers(loginSubstring, limit, callback) {
 
                     return result;
                 }, [])
-                .sort()                                                            // sort results
-                .splice(0, limit);                                                 // cut an array to a specified limit
+                .sort()                          // sort results
+                .splice(0, limit);               // cut an array to a specified limit
 
             console.log(suggestedUsers);
             callback(null, suggestedUsers);

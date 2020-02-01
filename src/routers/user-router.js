@@ -2,8 +2,8 @@ const express = require('express');
 const router = express.Router();
 const validator = require('express-joi-validation').createValidator({});
 
-const userService = require('./service');
-const userValidation = require('./validation');
+const userService = require('../services/user-service');
+const userValidation = require('../config/validation');
 
 router.get('/suggest', validator.query(userValidation.userAutoSuggestValidationSchema), (req, res) => {
     const loginSubstring = req.query.loginSubstring;
