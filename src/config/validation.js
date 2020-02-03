@@ -15,8 +15,19 @@ const userAutoSuggestValidationSchema = Joi.object({
     limit: Joi.number().integer()
 });
 
+const groupIdValidationSchema = Joi.object({
+    id: Joi.number().integer().required()
+});
+
+const groupDataValidationSchema = Joi.object({
+    name: Joi.string().required(),
+    permissions: Joi.string().required()
+});
+
 module.exports = {
     userIdValidationSchema,
     userDataValidationSchema,
-    userAutoSuggestValidationSchema
+    userAutoSuggestValidationSchema,
+    groupIdValidationSchema,
+    groupDataValidationSchema
 };

@@ -3,9 +3,9 @@ const router = express.Router();
 const validator = require('express-joi-validation').createValidator({});
 
 const userService = require('../services/user-service');
-const userValidation = require('../config/validation');
+const { userAutoSuggestValidationSchema, userIdValidationSchema, userDataValidationSchema } = require('../config/validation');
 
-router.get('/suggest', validator.query(userValidation.userAutoSuggestValidationSchema), (req, res) => {
+router.get('/suggest', validator.query(userAutoSuggestValidationSchema), (req, res) => {
     const loginSubstring = req.query.loginSubstring;
     const limit = req.query.limit;
 
@@ -18,7 +18,7 @@ router.get('/suggest', validator.query(userValidation.userAutoSuggestValidationS
     });
 });
 
-router.get('/:id', validator.params(userValidation.userIdValidationSchema), (req, res) => {
+router.get('/:id', validator.params(userIdValidationSchema), (req, res) => {
     const userId = req.params.id;
 
     userService.findUser(userId, (err, user) => {
@@ -30,7 +30,7 @@ router.get('/:id', validator.params(userValidation.userIdValidationSchema), (req
     });
 });
 
-router.post('/', validator.body(userValidation.userDataValidationSchema), (req, res) => {
+router.post('/', validator.body(userDataValidationSchema), (req, res) => {
     userService.createUser(req.body, (err, user) => {
         if (err) {
             return res.status(err.status).send(err.message);
@@ -40,7 +40,7 @@ router.post('/', validator.body(userValidation.userDataValidationSchema), (req, 
     });
 });
 
-router.put('/:id', validator.params(userValidation.userIdValidationSchema), validator.body(userValidation.userDataValidationSchema), (req, res) => {
+router.put('/:id', validator.params(userIdValidationSchema), validator.body(userDataValidationSchema), (req, res) => {
     const userId = req.params.id;
 
     userService.updateUser(userId, req.body, (err, updatedUser) => {
@@ -52,7 +52,7 @@ router.put('/:id', validator.params(userValidation.userIdValidationSchema), vali
     });
 });
 
-router.delete('/:id', validator.params(userValidation.userIdValidationSchema), (req, res) => {
+router.delete('/:id', validator.params(userIdValidationSchema), (req, res) => {
     const userId = req.params.id;
 
     userService.deleteUser(userId, (err) => {
