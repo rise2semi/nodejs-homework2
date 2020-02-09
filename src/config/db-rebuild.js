@@ -20,6 +20,16 @@ function dropTable() {
         .catch((err) => console.error('Users table cannot be deleted', err.stack));
 }
 
+/**
+ * Naming tables in upper case is a source of pain!
+ *
+ * I would recommend to use snake_case notation
+ * like:
+ * - table_name
+ * - column_name
+ *
+ * @return {Promise<T | void>}
+ */
 function createTable() {
     return client.query(`
         CREATE TABLE Users (

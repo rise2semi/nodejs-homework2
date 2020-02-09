@@ -6,18 +6,43 @@ const User = require('../models/user');
  * @param {Function} callback
  * @param {Boolean} raw
  */
-function findUser(id, callback, raw) {
-    User.findByPk(id)
-        .then((user) => {
-            if (!user) {
-                return callback({ status: 404, message: 'Cannot find a user' });
-            }
+/**
+ * You may use async/await syntax here
+ * just return a promise from the function and await it =)
+ *
+ * Service should not return anything like status code because it is piece of business login
+ * and it's unaware about an approach of communication with an end user. In this case you may test and use your
+ * service independently from you 'connection/routing layer'
+ *
+ * Conceptually your services are core of business login and routes just glue between end user and your
+ * business logic. So services can't know about approach of communications with an end user
+ * this responsibility should be offloaded to 'connection/routing layer'
+ *
+ * Pattern from Martin Fowler - https://www.martinfowler.com/eaaCatalog/remoteFacade.html
+ */
+async function findUser(id, callback, raw) {
+    // if you want to preserve back compatibility
+    if (callback) {
+        return User.findByPk(id)
+            .then((user) => {
+                if (!user) {
+                    // bad idea
+                    return callback({ status: 404, message: 'Cannot find a user' });
+                }
 
-            callback(null, (raw) ? user : user.get({ plain: true }));
-        })
-        .catch((err) => {
-            callback(err.status);
-        });
+                callback(null, (raw) ? user : user.get({ plain: true }));
+            })
+            .catch((err) => {
+                callback(err.status);
+            });
+    }
+
+    let result = await User.findByPk(id);
+    if (result && raw) {
+        result = result.get({ plain: true });
+    }
+
+    return result;
 }
 
 /**
@@ -41,21 +66,33 @@ function createUser(userData, callback) {
  * @param {{ login: String, password: String, age: Number }} userData
  * @param {Function} callback
  */
-function updateUser(id, userData, callback) {
-    findUser(id, (err, user) => {
-        if (err) {
-            return callback(err);
-        }
+async function updateUser(id, userData) {
+    const updateQuery = {};
 
-        console.log(user);
+    if (userData.login) updateQuery.login = userData.login;
+    if (userData.password) updateQuery.password = userData.password;
+    if (userData.age) updateQuery.age = userData.age;
 
-        user.login = userData.login;
-        user.password = userData.password;
-        user.age = userData.age;
-        user.save();
-
-        callback(null, user.get({ plain: true }));
-    }, true);
+    /**
+     * One operation - just update =)
+     */
+    return User.update(updateQuery, {
+        where: { id }
+    });
+    // findUser(id, (err, user) => {
+    //     if (err) {
+    //         return callback(err);
+    //     }
+    //
+    //     console.log(user);
+    //
+    //     user.login = userData.login;
+    //     user.password = userData.password;
+    //     user.age = userData.age;
+    //     user.save();
+    //
+    //     callback(null, user.get({ plain: true }));
+    // }, true);
 }
 
 /**
@@ -63,17 +100,22 @@ function updateUser(id, userData, callback) {
  * @param {String} id
  * @param {Function} callback
  */
-function deleteUser(id, callback) {
-    findUser(id, (err, user) => {
-        if (err) {
-            return callback(err);
+function deleteUser(id) {
+    return User.update({ isDeleted: true }, {
+        where: {
+            id
         }
-
-        user.isdeleted = true;
-        user.save();
-
-        callback();
-    }, true);
+    });
+    // findUser(id, (err, user) => {
+    //     if (err) {
+    //         return callback(err);
+    //     }
+    //
+    //     user.isdeleted = true;
+    //     user.save();
+    //
+    //     callback();
+    // }, true);
 }
 
 /**
