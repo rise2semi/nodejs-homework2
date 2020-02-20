@@ -3,108 +3,72 @@ const User = require('../models/user');
 /**
  * Find user by ID
  * @param {Integer} id
- * @param {Function} callback
- * @param {Boolean} raw
  */
-function findUser(id, callback, raw) {
-    User.findByPk(id)
-        .then((user) => {
-            if (!user) {
-                return callback({ status: 404, message: 'Cannot find a user' });
-            }
+async function findUser(id) {
+    const user = await User.findByPk(id);
 
-            callback(null, (raw) ? user : user.get({ plain: true }));
-        })
-        .catch((err) => {
-            callback(err.status);
-        });
+    if (user) {
+        return user.get({ plain: true });
+    }
+
+    return user;
 }
 
 /**
  * Create user
  * @param {{ login: String, password: String, age: Number }} userData
- * @param {Function} callback
  */
-function createUser(userData, callback) {
-    User.create(userData)
-        .then((user) => {
-            callback(null, user);
-        })
-        .catch(err => {
-            callback(err);
-        });
+function createUser(userData) {
+    return User.create(userData);
 }
 
 /**
  * Update user by ID
  * @param {String} id
  * @param {{ login: String, password: String, age: Number }} userData
- * @param {Function} callback
  */
-function updateUser(id, userData, callback) {
-    findUser(id, (err, user) => {
-        if (err) {
-            return callback(err);
-        }
+function updateUser(id, userData) {
+    const updateQuery = {};
 
-        console.log(user);
+    if (userData.login) updateQuery.login = userData.login;
+    if (userData.password) updateQuery.password = userData.password;
+    if (userData.age) updateQuery.age = userData.age;
 
-        user.login = userData.login;
-        user.password = userData.password;
-        user.age = userData.age;
-        user.save();
-
-        callback(null, user.get({ plain: true }));
-    }, true);
+    return User.update(updateQuery, {
+        where: { id }
+    });
 }
 
 /**
  * Delete user by ID
  * @param {String} id
- * @param {Function} callback
  */
-function deleteUser(id, callback) {
-    findUser(id, (err, user) => {
-        if (err) {
-            return callback(err);
-        }
-
-        user.isdeleted = true;
-        user.save();
-
-        callback();
-    }, true);
+function deleteUser(id) {
+    return User.update({ isDeleted: true }, {
+        where: { id }
+    });
 }
 
 /**
  * Suggest users by `login`
  * @param {String} loginSubstring
  * @param {Number} limit
- * @param {Function} callback
  */
-function autoSuggestUsers(loginSubstring, limit, callback) {
-    User.findAll({ raw: true })
-        .then((users) => {
-            const suggestedUsers = users
-                .reduce((result, { login, isdeleted }) => {
-                    const normalisedLogin = login.toLowerCase();
-                    const normalisedSearch = loginSubstring.toLowerCase();
+async function autoSuggestUsers(loginSubstring, limit) {
+    const users = await User.findAll({ raw: true });
+    return users
+        .reduce((result, { login, isdeleted }) => {
+            const normalisedLogin = login.toLowerCase();
+            const normalisedSearch = loginSubstring.toLowerCase();
 
-                    if (normalisedLogin.includes(normalisedSearch) && !isdeleted) {
-                        result.push(login);
-                    }
+            if (normalisedLogin.includes(normalisedSearch) && !isdeleted) {
+                result.push(login);
+            }
 
-                    return result;
-                }, [])
-                .sort()                          // sort results
-                .splice(0, limit);               // cut an array to a specified limit
-
-            console.log(suggestedUsers);
-            callback(null, suggestedUsers);
-        })
-        .catch((err) => {
-            callback(err);
-        });
+            return result;
+        }, [])
+        .sort()                // sort results
+        .splice(0, limit);     // cut an array to a specified limit
 }
 
 module.exports = {

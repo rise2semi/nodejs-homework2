@@ -24,10 +24,15 @@ const groupDataValidationSchema = Joi.object({
     permissions: Joi.string().required()
 });
 
+const groupUsersDataValidationSchema = Joi.object({
+    userIds: Joi.array().items(Joi.number().integer())
+});
+
 module.exports = {
     userIdValidationSchema,
     userDataValidationSchema,
     userAutoSuggestValidationSchema,
     groupIdValidationSchema,
-    groupDataValidationSchema
+    groupDataValidationSchema,
+    groupUsersDataValidationSchema
 };

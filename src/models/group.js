@@ -9,6 +9,7 @@ Group.init({
 }, {
     sequelize,
     timestamps: false,
+    underscored: true,
     modelName: 'group',
     tableName: 'groups'
 });

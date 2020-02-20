@@ -2,95 +2,58 @@ const Group = require('../models/group');
 
 /**
  * Find all groups
- * @param {Function} callback
  */
-function findAllGroups(callback) {
-    Group.findAll({ raw: true })
-        .then((groups) => {
-            if (!groups) {
-                return callback({ status: 404, message: 'Cannot retrieve the groups' });
-            }
-
-            callback(null, groups);
-        })
-        .catch((err) => {
-            callback(err.status);
-        });
+function findAllGroups() {
+    return Group.findAll({ raw: true });
 }
 
 /**
  * Find group by ID
  * @param {Integer} id
- * @param {Function} callback
- * @param {Boolean} raw
  */
-function findGroup(id, callback, raw) {
-    Group.findByPk(id)
-        .then((group) => {
-            if (!group) {
-                return callback({ status: 404, message: 'Cannot find a group' });
-            }
+async function findGroup(id) {
+    const group = await Group.findByPk(id);
 
-            callback(null, (raw) ? group : group.get({ plain: true }));
-        })
-        .catch((err) => {
-            callback(err.status);
-        });
+    if (group) {
+        return group.get({ plain: true });
+    }
+
+    return group;
 }
 
 /**
  * Create group
  * @param {{ name: String, permissions: String }} groupData
- * @param {Function} callback
  */
-function createGroup(groupData, callback) {
-    Group.create(groupData)
-        .then((group) => {
-            callback(null, group);
-        })
-        .catch(err => {
-            callback(err);
-        });
+function createGroup(groupData) {
+    return Group.create(groupData);
 }
 
 /**
  * Update group by ID
  * @param {String} id
  * @param {{ name: String, permissions: String }} groupData
- * @param {Function} callback
  */
-function updateGroup(id, groupData, callback) {
-    findGroup(id, (err, group) => {
-        if (err) {
-            return callback(err);
-        }
+function updateGroup(id, groupData) {
+    const updateQuery = {};
 
-        group.name = groupData.login;
-        group.permissions = groupData.permissions;
-        group.save();
+    if (groupData.name) updateQuery.login = groupData.name;
+    if (groupData.permissions) updateQuery.password = groupData.permissions;
 
-        callback(null, group.get({ plain: true }));
-    }, true);
+    return Group.update(updateQuery, {
+        where: { id }
+    });
 }
-
 
 /**
  * Delete group by ID
  * @param {String} id
- * @param {Function} callback
  */
-function deleteGroup(id, callback) {
-    findGroup(id, (err, group) => {
-        if (err) {
-            return callback(err);
-        }
-
-        group.remove();
-
-        callback();
-    }, true);
+function deleteGroup(id) {
+    return Group.destroy({
+        where: { id }
+    });
 }
-
 
 module.exports = {
     findAllGroups,

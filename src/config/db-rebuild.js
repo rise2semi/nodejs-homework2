@@ -15,22 +15,28 @@ function openConnection() {
 }
 
 function dropUsersTable() {
-    return client.query('DROP TABLE Users')
+    return client.query('DROP TABLE users')
         .then(() => console.log('Users table successfully deleted'))
         .catch((err) => console.error('Users table cannot be deleted', err.stack));
 }
 
 function dropGroupsTable() {
-    return client.query('DROP TABLE Groups')
-        .then(() => console.log('Griups table successfully deleted'))
+    return client.query('DROP TABLE groups')
+        .then(() => console.log('Groups table successfully deleted'))
         .catch((err) => console.error('Groups table cannot be deleted', err.stack));
+}
+
+function dropUserGroupTable() {
+    return client.query('DROP TABLE usergroup')
+        .then(() => console.log('UserGroup table successfully deleted'))
+        .catch((err) => console.error('UserGroup table cannot be deleted', err.stack));
 }
 
 function createUsersTable() {
     return client.query(`
-        CREATE TABLE Users (
+        CREATE TABLE users (
             id SERIAL,
-            isDeleted boolean NOT NULL DEFAULT false,
+            is_deleted boolean NOT NULL DEFAULT false,
             login varchar(30) NOT NULL,
             password varchar(30) NOT NULL,
             age int NOT NULL
@@ -41,7 +47,7 @@ function createUsersTable() {
 
 function createGroupsTable() {
     return client.query(`
-        CREATE TABLE Groups (
+        CREATE TABLE groups (
             id SERIAL,
             name varchar(30) NOT NULL,
             permissions varchar(30) NOT NULL
@@ -50,9 +56,20 @@ function createGroupsTable() {
         .catch((err) => console.error('Groups table cannot be created', err.stack));
 }
 
+function createUserGroupTable() {
+    return client.query(`
+        CREATE TABLE usergroup (
+            id SERIAL,
+            user_id int NOT NULL,
+            group_id int NOT NULL
+        )`)
+        .then(() => console.log('UserGroup table successfully created'))
+        .catch((err) => console.error('UserGroup table cannot be created', err.stack));
+}
+
 function insertUsersData() {
     return client.query(`
-        INSERT INTO Users (login, password, age)
+        INSERT INTO users (login, password, age)
         VALUES
             ('Borys', 'Semerenko', 30),
             ('Morys', 'Semerenko', 40),
@@ -63,7 +80,7 @@ function insertUsersData() {
 
 function insertGroupsData() {
     return client.query(`
-        INSERT INTO Groups (name, permissions)
+        INSERT INTO groups (name, permissions)
         VALUES
             ('Authors', 'Write'),
             ('Users', 'Read'),
@@ -83,8 +100,10 @@ function closeConnection() {
     await openConnection();
     await dropUsersTable();
     await dropGroupsTable();
+    await dropUserGroupTable();
     await createUsersTable();
     await createGroupsTable();
+    await createUserGroupTable();
     await insertUsersData();
     await insertGroupsData();
     await closeConnection();

@@ -3,62 +3,65 @@ const router = express.Router();
 const validator = require('express-joi-validation').createValidator({});
 
 const groupService = require('../services/group-service');
-const { groupIdValidationSchema, groupDataValidationSchema } = require('../config/validation');
+const userGroupService = require('../services/user-group-service');
+const { groupIdValidationSchema, groupDataValidationSchema, groupUsersDataValidationSchema } = require('../config/validation');
 
-router.get('/', (req, res) => {
-    groupService.findAllGroups((err, groups) => {
-        if (err) {
-            return res.status(err.status).send(err.message);
-        }
+router.get('/', async (req, res) => {
+    const groups = await groupService.findAllGroups();
+    if (!groups) {
+        return res.status(404).send({ error: 'Cannot find any group' });
+    }
 
-        res.json(groups);
-    });
+    res.json(groups);
 });
 
-router.get('/:id', validator.params(groupIdValidationSchema), (req, res) => {
+router.get('/:id', validator.params(groupIdValidationSchema), async (req, res) => {
     const groupId = req.params.id;
+    const group = await groupService.findGroup(groupId);
+    if (!group) {
+        return res.status(404).send({ error: 'Cannot find a group' });
+    }
 
-    groupService.findGroup(groupId, (err, group) => {
-        if (err) {
-            return res.status(err.status).send(err.message);
-        }
-
-        res.json(group);
-    });
+    res.json(group);
 });
 
-router.post('/', validator.body(groupDataValidationSchema), (req, res) => {
-    groupService.createGroup(req.body, (err, group) => {
-        if (err) {
-            return res.status(err.status).send(err.message);
-        }
+router.post('/', validator.body(groupDataValidationSchema), async (req, res) => {
+    const group = await groupService.createGroup(req.body);
+    if (!group) {
+        return res.status(404).send({ error: 'Cannot create a group' });
+    }
 
-        res.status('201').json(group);
-    });
+    res.status('201').json(group);
 });
 
-router.put('/:id', validator.params(groupIdValidationSchema), validator.body(groupDataValidationSchema), (req, res) => {
+router.put('/:id', validator.params(groupIdValidationSchema), validator.body(groupDataValidationSchema), async (req, res) => {
     const groupId = req.params.id;
+    const group = await groupService.updateGroup(groupId, req.body);
+    if (!group) {
+        return res.status(404).send({ error: 'Cannot update a group' });
+    }
 
-    groupService.updateGroup(groupId, req.body, (err, updatedGroup) => {
-        if (err) {
-            return res.status(err.status).send(err.message);
-        }
-
-        res.json(updatedGroup);
-    });
+    res.status('200').send();
 });
 
-router.delete('/:id', validator.params(groupIdValidationSchema), (req, res) => {
+router.delete('/:id', validator.params(groupIdValidationSchema), async (req, res) => {
     const groupId = req.params.id;
+    const group = await groupService.deleteGroup(groupId);
+    if (!group) {
+        return res.status(404).send({ error: 'Cannot update a group' });
+    }
 
-    groupService.deleteGroup(groupId, (err) => {
-        if (err) {
-            return res.status(err.status).send(err.message);
-        }
+    res.status('200').send();
+});
 
-        res.status('200').send();
-    });
+router.post('/:id/users', validator.params(groupIdValidationSchema), validator.body(groupUsersDataValidationSchema), async (req, res) => {
+    const groupId = req.params.id;
+    const status = await userGroupService.addUsersToGroup(groupId, req.body.userIds);
+    if (!status) {
+        return res.status(404).send({ error: 'Cannot add users to a group' });
+    }
+
+    res.status('200').send();
 });
 
 module.exports = router;
