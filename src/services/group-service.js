@@ -37,6 +37,12 @@ function createGroup(groupData) {
 function updateGroup(id, groupData) {
     const updateQuery = {};
 
+    /**
+     * Such check is a logical trap
+     * Imagine the situation where you need to check numeric field but zero is also acceptable
+     *
+     * Consider to use typeof $VARIABLE$ === $TYPE$
+     */
     if (groupData.name) updateQuery.login = groupData.name;
     if (groupData.permissions) updateQuery.password = groupData.permissions;
 

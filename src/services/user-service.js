@@ -32,6 +32,10 @@ function updateUser(id, userData) {
 
     if (userData.login) updateQuery.login = userData.login;
     if (userData.password) updateQuery.password = userData.password;
+    /**
+     * If forget about middleware validation
+     * Could I set my age to zero ?)
+     */
     if (userData.age) updateQuery.age = userData.age;
 
     return User.update(updateQuery, {
