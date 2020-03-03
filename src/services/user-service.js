@@ -1,10 +1,13 @@
 const User = require('../models/user');
+const logger = require('../config/logger');
 
 /**
  * Find user by ID
  * @param {Integer} id
  */
 async function findUser(id) {
+    logger.info(`userService.findUser, args: ${id}`);
+
     const user = await User.findByPk(id);
 
     if (user) {
@@ -19,6 +22,8 @@ async function findUser(id) {
  * @param {{ login: String, password: String, age: Number }} userData
  */
 function createUser(userData) {
+    logger.info(`userService.createUser, args: ${JSON.stringify(userData)}`);
+
     return User.create(userData);
 }
 
@@ -28,6 +33,8 @@ function createUser(userData) {
  * @param {{ login: String, password: String, age: Number }} userData
  */
 function updateUser(id, userData) {
+    logger.info(`userService.updateUser, args: ${id}, ${JSON.stringify(userData)}`);
+
     const updateQuery = {};
 
     if (userData.login) updateQuery.login = userData.login;
@@ -44,6 +51,8 @@ function updateUser(id, userData) {
  * @param {String} id
  */
 function deleteUser(id) {
+    logger.info(`userService.deleteUser, args: ${id}`);
+
     return User.update({ isDeleted: true }, {
         where: { id }
     });
@@ -55,6 +64,8 @@ function deleteUser(id) {
  * @param {Number} limit
  */
 async function autoSuggestUsers(loginSubstring, limit) {
+    logger.info(`userService.autoSuggestUsers, args: ${loginSubstring}, ${limit}`);
+
     const users = await User.findAll({ raw: true });
     return users
         .reduce((result, { login, isdeleted }) => {
