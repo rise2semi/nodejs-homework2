@@ -44,10 +44,10 @@ function createGroup(groupData) {
 function updateGroup(id, groupData) {
     logger.info(`groupService.updateGroup, args: ${id}, ${JSON.stringify(groupData)}`);
 
-    const updateQuery = {};
-
-    if (groupData.name) updateQuery.login = groupData.name;
-    if (groupData.permissions) updateQuery.password = groupData.permissions;
+    const updateQuery = {
+        login: groupData.name,
+        permissions: groupData.permissions
+    };
 
     return Group.update(updateQuery, {
         where: { id }

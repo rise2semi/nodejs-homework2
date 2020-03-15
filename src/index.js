@@ -1,43 +1,27 @@
 const express = require('express');
-const expressWinston = require('express-winston');
-const winston = require('winston');
 const app = express();
 
 const userRouter = require('./routers/user-router');
 const groupRouter = require('./routers/group-router');
+const errorHandler = require('./middlewares/error-handler');
+const expressLogger = require('./config/express-logger');
+const expressErrorLogger = require('./config/express-error-logger');
 
 require('dotenv').config();
 
 const { NODE_PORT } = process.env;
 
-app.use(expressWinston.logger({
-    transports: [
-        new winston.transports.Console()
-    ],
-    format: winston.format.combine(
-        winston.format.colorize(),
-        winston.format.simple()
-    )
-}));
-
+app.use(expressLogger);
 app.use(express.json());
 app.use('/user', userRouter);
 app.use('/group', groupRouter);
+app.use(errorHandler);
+app.use(expressErrorLogger);
 
-app.use(expressWinston.errorLogger({
-    transports: [
-        new winston.transports.Console()
-    ],
-    format: winston.format.combine(
-        winston.format.colorize(),
-        winston.format.json()
-    )
-}));
-
-process.on('unhandledRejection', (reason, p) => {
-    console.error(reason, 'Unhandled Rejection at Promise', p);
-}).on('uncaughtException', err => {
-    console.error(err, 'Uncaught Exception thrown', err);
+process.on('unhandledRejection', (reason, promise) => {
+    console.error(reason, 'Unhandled Rejection at Promise', promise);
+}).on('uncaughtException', error => {
+    console.error(error, 'Uncaught Exception thrown');
 });
 
 app.listen(NODE_PORT, () => {

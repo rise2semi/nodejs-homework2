@@ -5,6 +5,9 @@ const validator = require('express-joi-validation').createValidator({});
 const userService = require('../services/user-service');
 const { userAutoSuggestValidationSchema, userIdValidationSchema, userDataValidationSchema } = require('../config/validation');
 
+const userExists = require('../middlewares/user-exists');
+const { BadRequestError } = require('../services/error-service');
+
 router.get('/suggest', validator.query(userAutoSuggestValidationSchema), async (req, res) => {
     const loginSubstring = req.query.loginSubstring;
     const limit = req.query.limit;
@@ -13,40 +16,37 @@ router.get('/suggest', validator.query(userAutoSuggestValidationSchema), async (
     res.json(users);
 });
 
-router.get('/:id', validator.params(userIdValidationSchema), async (req, res) => {
+router.get('/:id', validator.params(userIdValidationSchema), userExists(), async (req, res) => {
     const userId = req.params.id;
     const user = await userService.findUser(userId);
-    if (!user) {
-        return res.status(404).send({ error: 'Cannot find a user' });
-    }
 
     res.json(user);
 });
 
-router.post('/', validator.body(userDataValidationSchema), async (req, res) => {
+router.post('/', validator.body(userDataValidationSchema), async (req, res, next) => {
     const user = await userService.createUser(req.body);
     if (!user) {
-        return res.status(404).send({ error: 'Cannot create a user' });
+        return next(new BadRequestError('Cannot create a user'));
     }
 
     res.json(user);
 });
 
-router.put('/:id', validator.params(userIdValidationSchema), validator.body(userDataValidationSchema), async (req, res) => {
+router.put('/:id', validator.params(userIdValidationSchema), validator.body(userDataValidationSchema), userExists(), async (req, res, next) => {
     const userId = req.params.id;
     const user = await userService.updateUser(userId, req.body);
     if (!user) {
-        return res.status(404).send({ error: 'Cannot update a user' });
+        return next(new BadRequestError('Cannot update a user'));
     }
 
     res.status('200').send();
 });
 
-router.delete('/:id', validator.params(userIdValidationSchema), async (req, res) => {
+router.delete('/:id', validator.params(userIdValidationSchema), async (req, res, next) => {
     const userId = req.params.id;
     const user = await userService.deleteUser(userId);
     if (!user) {
-        return res.status(404).send({ error: 'Cannot delete a user' });
+        return next(new BadRequestError('Cannot delete a user'));
     }
 
     res.status('200').send();

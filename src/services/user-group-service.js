@@ -10,7 +10,7 @@ const logger = require('../config/logger');
 async function addUsersToGroup(groupId, userIds) {
     logger.info(`userGroupService.addUsersToGroup, args: ${groupId}, ${userIds}`);
 
-    return await sequelize.transaction(async (t) => {
+    return sequelize.transaction(async (t) => {
         await userIds.forEach(async (userId) => {
             await UserGroup.create({ groupId, userId }, { transaction: t });
         });

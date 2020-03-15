@@ -35,13 +35,7 @@ function createUser(userData) {
 function updateUser(id, userData) {
     logger.info(`userService.updateUser, args: ${id}, ${JSON.stringify(userData)}`);
 
-    const updateQuery = {};
-
-    if (userData.login) updateQuery.login = userData.login;
-    if (userData.password) updateQuery.password = userData.password;
-    if (userData.age) updateQuery.age = userData.age;
-
-    return User.update(updateQuery, {
+    return User.update(userData, {
         where: { id }
     });
 }
