@@ -4,6 +4,11 @@ const userIdValidationSchema = Joi.object({
     id: Joi.number().integer().required()
 });
 
+const userCredentialsValidationSchema = Joi.object({
+    login: Joi.string().required(),
+    password: Joi.string().regex(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{2,}$/).required()
+});
+
 const userDataValidationSchema = Joi.object({
     login: Joi.string().required(),
     password: Joi.string().regex(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{2,}$/).required(),
@@ -30,6 +35,7 @@ const groupUsersDataValidationSchema = Joi.object({
 
 module.exports = {
     userIdValidationSchema,
+    userCredentialsValidationSchema,
     userDataValidationSchema,
     userAutoSuggestValidationSchema,
     groupIdValidationSchema,

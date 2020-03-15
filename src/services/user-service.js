@@ -1,5 +1,9 @@
 const User = require('../models/user');
 const logger = require('../config/logger');
+const jwt = require('jsonwebtoken');
+
+require('dotenv').config();
+const { JWT_KEY } = process.env;
 
 /**
  * Find user by ID
@@ -15,6 +19,33 @@ async function findUser(id) {
     }
 
     return user;
+}
+
+/**
+ * Find user by login/password
+ * @param {String} login
+ * @param {String} password
+ */
+async function findUserByCredentials(login, password) {
+    logger.info(`userService.findUserByCredentials, args: ${login}, ${password}`);
+
+    const user = await User.findOne({ login, password });
+
+    if (user) {
+        return user.get({ plain: true });
+    }
+
+    return user;
+}
+
+/**
+ * Generate JWT token
+ * @param {Integer} id
+ */
+async function generateAuthToken(id) {
+    logger.info(`userService.generateAuthToken, args: ${id}`);
+
+    return jwt.sign({ id }, JWT_KEY);
 }
 
 /**
@@ -81,5 +112,7 @@ module.exports = {
     createUser,
     updateUser,
     deleteUser,
-    autoSuggestUsers
+    autoSuggestUsers,
+    findUserByCredentials,
+    generateAuthToken
 };

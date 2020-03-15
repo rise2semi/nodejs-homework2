@@ -6,6 +6,24 @@ class BadRequestError extends Error {
     }
 }
 
+class UnauthorizedError extends Error {
+    constructor(message, statusCode = 401) {
+        super(message);
+
+        this.statusCode = statusCode;
+    }
+}
+
+class ForbiddenError extends Error {
+    constructor(message, statusCode = 403) {
+        super(message);
+
+        this.statusCode = statusCode;
+    }
+}
+
 module.exports = {
-    BadRequestError
+    BadRequestError,
+    UnauthorizedError,
+    ForbiddenError
 };
