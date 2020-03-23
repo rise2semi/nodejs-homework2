@@ -42,7 +42,7 @@ async function findUserByCredentials(login, password) {
  * Generate JWT token
  * @param {Integer} id
  */
-async function generateAuthToken(id) {
+function generateAuthToken(id) {
     logger.info(`userService.generateAuthToken, args: ${id}`);
 
     return jwt.sign({ id }, JWT_KEY);

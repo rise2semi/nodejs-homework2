@@ -6,7 +6,8 @@
   "scripts": {
     "lint": "eslint src",
     "start": "nodemon src/index.js --exec 'eslint src && node'",
-    "db-rebuild": "node src/config/db-rebuild"
+    "db-rebuild": "node src/config/db-rebuild",
+    "test": "jest"
   },
   "keywords": [],
   "author": "",
@@ -19,6 +20,7 @@
     "babel-eslint": "^10.0.3",
     "eslint": "^6.8.0",
     "express-joi-validation": "^4.0.3",
+    "jest": "^25.1.0",
     "nodemon": "^2.0.2"
   },
   "dependencies": {
